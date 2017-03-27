@@ -54,7 +54,7 @@ module.exports = {
 
   output: {
     path: root(''),
-    publicPath: '/',
+    publicPath: '',
     filename: '[name].js',
     chunkFilename: '[id].chunk.js'
   },
