@@ -8,12 +8,12 @@ import {IMultiSelectOption, IMultiSelectSettings, IMultiSelectTexts} from './mul
       <h2>Select</h2>
       <ss-multiselect-dropdown [options]="filteredCountries" [settings]="selectSettings" [texts]="texts" [(ngModel)]="selectedCountries"></ss-multiselect-dropdown>
       <h2>Config</h2>
-      <ul>
+      <ul class="config">
         <li *ngFor="let setting of settings, let i = index">
           <label [for]="'chkSetting_'+i">{{setting.name}}</label>
           <input *ngIf="setting.inputType==='checkbox' && setting.name !== 'checkedStyle'" [id]="'chkSetting_'+i" type="checkbox" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()" />
           <input *ngIf="setting.inputType!=='checkbox' && setting.name !== 'checkedStyle'" [id]="'chkSetting_'+i" [type]="setting.inputType" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()" />
-          <select *ngIf="setting.name === 'checkedStyle'" [(ngModel)]="selectSettings[setting.name]">
+          <select *ngIf="setting.name === 'checkedStyle'" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()">
             <option value="checkboxes">checkboxes</option>
             <option value="glyphicon">glyphicon</option>
             <option value="fontawesome">fontawesome</option>
