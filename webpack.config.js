@@ -3,7 +3,7 @@ var webpack = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-var _root = path.resolve(__dirname, '..');
+var _root = __dirname;
 
 function root(args) {
   args = Array.prototype.slice.call(arguments, 0);
@@ -53,7 +53,7 @@ module.exports = {
   },
 
   output: {
-    path: root('dist'),
+    path: root(''),
     publicPath: 'http://localhost:8080/',
     filename: '[name].js',
     chunkFilename: '[id].chunk.js'
@@ -75,7 +75,7 @@ module.exports = {
     new ExtractTextPlugin('[name].css'),
 
     new HtmlWebpackPlugin({
-      template: 'index.html'
+      template: 'src/index.html'
     })
   ],
 
