@@ -1,65 +1,84 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {IMultiSelectOption, IMultiSelectSettings, IMultiSelectTexts} from './multiselect-dropdown';
 
 @Component({
     selector: 'my-app',
     template: `
 		<div>
-			<h2>Default</h2>
-			<ss-multiselect-dropdown [options]="countries" [texts]="texts"></ss-multiselect-dropdown>
-      <h3>Markup</h3>
-
-			<h2>Glyphicons and check all/none</h2>
-			<ss-multiselect-dropdown [options]="countries" [settings]="selectSettings" [texts]="texts"></ss-multiselect-dropdown>
-      <h3>Markup</h3>
-
-			<h2>Search filter</h2>
-			<ss-multiselect-dropdown [options]="countries" [settings]="selectSettings2" [texts]="texts"></ss-multiselect-dropdown>
-      <h3>Markup</h3>
-
-			<h2>Default model, selection limit and no dynamic title</h2>
-			<ss-multiselect-dropdown [options]="countries" [settings]="selectSettings3" [texts]="texts"></ss-multiselect-dropdown>
-      <h3>Markup</h3>
-
-      <h2>Default model, selection limit, auto-unselect</h2>
-			<ss-multiselect-dropdown [options]="countries" [settings]="selectSettings4" [texts]="texts"></ss-multiselect-dropdown>
-      <h3>Markup</h3>
-
-	    </div>
+      <h2>Select</h2>
+      <ss-multiselect-dropdown [options]="filteredCountries" [settings]="selectSettings" [texts]="texts" [(ngModel)]="selectedCountries"></ss-multiselect-dropdown>
+      <h2>Config</h2>
+      <ul>
+        <li *ngFor="let setting of settings, let i = index">
+          <label [for]="'chkSetting_'+i">{{setting.name}}</label>
+          <input *ngIf="setting.inputType==='checkbox' && setting.name !== 'checkedStyle'" [id]="'chkSetting_'+i" type="checkbox" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()" />
+          <input *ngIf="setting.inputType!=='checkbox' && setting.name !== 'checkedStyle'" [id]="'chkSetting_'+i" [type]="setting.inputType" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()" />
+          <select *ngIf="setting.name === 'checkedStyle'" [(ngModel)]="selectSettings[setting.name]">
+            <option value="checkboxes">checkboxes</option>
+            <option value="glyphicon">glyphicon</option>
+            <option value="fontawesome">fontawesome</option>
+          </select>
+        </li>
+      </ul>
+      <h2>Data</h2>
+      <label for="chkLabels">Labels</label>
+      <input id="chkLabels" type="checkbox" (change)="filterCountries($event.target.checked)" />
+      <pre>{{ filteredCountries | json }}</pre>
+    </div>
 	`,
 	providers: []
 })
-export class AppComponent {
-	private selectedCountries: number[] = [1, 2];
+export class AppComponent implements OnInit {
+	private selectedCountries: number[] = [2, 3];
 
 	private countries: IMultiSelectOption[] = [
-		{ id: 1, name: 'Sweden' },
-		{ id: 2, name: 'Norway' },
-		{ id: 3, name: 'Denmark' },
-		{ id: 4, name: 'Finland' },
+    { id: 1, name: 'Europe', isLabel: true },
+		{ id: 2, name: 'Sweden', parentId: 1 },
+		{ id: 3, name: 'Norway', parentId: 1 },
+		{ id: 4, name: 'Denmark', parentId: 1 },
+		{ id: 5, name: 'Finland', parentId: 1 },
+    { id: 6, name: 'Asia', isLabel: true },
+    { id: 7, name: 'China', parentId: 6 },
+    { id: 8, name: 'Japan', parentId: 6 },
+    { id: 9, name: 'Indonesia', parentId: 6 },
+    { id: 10, name: 'Thailand', parentId: 6 },
 	];
+
+  private filteredCountries: IMultiSelectOption[] = this.countries;
+  private settings: any[] = [];
 
 	private texts: IMultiSelectTexts = {
 		defaultTitle: 'Select countries'
 	};
 
 	private selectSettings: IMultiSelectSettings = {
-		checkedStyle: 'glyphicon',
-		showCheckAll: true,
-		showUncheckAll: true,
+    pullRight: false,
+    enableSearch: false,
+    checkedStyle: 'checkboxes',
+    buttonClasses: 'btn btn-default btn-secondary',
+    selectionLimit: 0,
+    closeOnSelect: false,
+    autoUnselect: false,
+    showCheckAll: false,
+    showUncheckAll: false,
+    dynamicTitleMaxItems: 3,
+    maxHeight: '300px'
 	};
 
-	private selectSettings2: IMultiSelectSettings = {
-		enableSearch: true,
-	};
+  ngOnInit() {
+    this.filterCountries(false);
+    this.settings = Object.keys(this.selectSettings).map(setting => ({
+      name: setting,
+      inputType: (typeof(this.selectSettings[setting])=='boolean' ? 'checkbox' :
+      (typeof(this.selectSettings[setting])=='number') ? 'number' : 'text')
+    }));
+  }
 
-	private selectSettings3: IMultiSelectSettings = {
-		selectionLimit: 3,
-		dynamicTitleMaxItems: 0,
-	};
+  filterCountries(displayLabels: boolean) {
+    this.filteredCountries = this.countries.filter(country => displayLabels || !country.isLabel).map(country => displayLabels ? country : { id:country.id, name: country.name });
+  }
 
-  private selectSettings4: IMultiSelectSettings = {
-    selectionLimit: 1,
-    autoUnselect: true
-  };
+  applySettings() {
+    this.selectSettings = Object.assign({}, this.selectSettings);
+  }
 }
