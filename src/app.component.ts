@@ -5,31 +5,41 @@ import {IMultiSelectOption, IMultiSelectSettings, IMultiSelectTexts} from './mul
     selector: 'my-app',
     template: `
 		<div>
-      <h2>Select</h2>
+      <h2>Example</h2>
       <ss-multiselect-dropdown [options]="filteredCountries" [settings]="selectSettings" [texts]="texts" [(ngModel)]="selectedCountries"></ss-multiselect-dropdown>
-      <h2>Config</h2>
-      <ul class="config">
-        <li *ngFor="let setting of settings, let i = index">
-          <label [for]="'chkSetting_'+i">{{setting.name}}</label>
-          <input *ngIf="setting.inputType==='checkbox' && setting.name !== 'checkedStyle'" [id]="'chkSetting_'+i" type="checkbox" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()" />
-          <input *ngIf="setting.inputType!=='checkbox' && setting.name !== 'checkedStyle'" [id]="'chkSetting_'+i" [type]="setting.inputType" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()" />
-          <select *ngIf="setting.name === 'checkedStyle'" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()">
-            <option value="checkboxes">checkboxes</option>
-            <option value="glyphicon">glyphicon</option>
-            <option value="fontawesome">fontawesome</option>
-          </select>
-        </li>
-      </ul>
-      <h2>Data</h2>
-      <label for="chkLabels">Labels</label>
-      <input id="chkLabels" type="checkbox" (change)="filterCountries($event.target.checked)" />
-      <pre>{{ filteredCountries | json }}</pre>
     </div>
+    <hr/>
+    <div class="row">
+      <div class="col-md-6">
+        <h2>Config</h2>
+        <ul class="config">
+          <li *ngFor="let setting of settings, let i = index">
+            <label [for]="'chkSetting_'+i">{{setting.name}}</label>
+            <input *ngIf="setting.inputType==='checkbox' && setting.name !== 'checkedStyle'" [id]="'chkSetting_'+i" type="checkbox" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()" />
+            <input *ngIf="setting.inputType!=='checkbox' && setting.name !== 'checkedStyle'" [id]="'chkSetting_'+i" [type]="setting.inputType" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()" />
+            <select *ngIf="setting.name === 'checkedStyle'" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()">
+              <option value="checkboxes">checkboxes</option>
+              <option value="glyphicon">glyphicon</option>
+              <option value="fontawesome">fontawesome</option>
+            </select>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h2>Data</h2>
+        <label for="chkParents">Parents</label>
+        <input id="chkParents" #chkParents type="checkbox" [checked]="dataParents" (change)="filterCountries($event.target.checked, chkLabels.checked)" />
+        <label for="chkLabels">Labels</label>
+        <input id="chkLabels" #chkLabels type="checkbox" [checked]="dataLabels" (change)="filterCountries(chkParents.checked, $event.target.checked)" />
+        <pre class="data">{{ filteredCountries | json }}</pre>
+      </div>
 	`,
 	providers: []
 })
 export class AppComponent implements OnInit {
 	private selectedCountries: number[] = [2, 3];
+  private dataParents: boolean = false;
+  private dataLabels: boolean = false;
 
 	private countries: IMultiSelectOption[] = [
     { id: 1, name: 'Europe', isLabel: true },
@@ -66,7 +76,7 @@ export class AppComponent implements OnInit {
 	};
 
   ngOnInit() {
-    this.filterCountries(false);
+    this.filterCountries(true, false);
     this.settings = Object.keys(this.selectSettings).map(setting => ({
       name: setting,
       inputType: (typeof(this.selectSettings[setting])=='boolean' ? 'checkbox' :
@@ -74,11 +84,20 @@ export class AppComponent implements OnInit {
     }));
   }
 
-  filterCountries(displayLabels: boolean) {
-    this.filteredCountries = this.countries.filter(country => displayLabels || !country.isLabel).map(country => displayLabels ? country : { id:country.id, name: country.name });
+  filterCountries(dataParents: boolean, dataLabels: boolean) {
+    this.dataParents = dataParents;
+    this.dataLabels = dataLabels;
+    this.filteredCountries = this.countries.filter(country => dataParents || dataLabels || !country.isLabel)
+      .map(country => {
+        let countryModel = { id:country.id, name: country.name };
+        if (dataParents && country.parentId) countryModel['parentId'] = country.parentId;
+        if (dataLabels && country.isLabel) countryModel['isLabel'] = country.isLabel;
+        return countryModel;
+      });
   }
 
   applySettings() {
     this.selectSettings = Object.assign({}, this.selectSettings);
+    this.filteredCountries = this.filteredCountries.slice();
   }
 }
