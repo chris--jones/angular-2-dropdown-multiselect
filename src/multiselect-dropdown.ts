@@ -199,8 +199,7 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
     allSelected: 'All selected',
   };
 
-  constructor(private element: ElementRef,
-              differs: IterableDiffers) {
+  constructor(private element: ElementRef, differs: IterableDiffers) {
     this.differ = differs.find([]).create(null);
   }
 
@@ -214,12 +213,7 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
     this.settings = Object.assign(this.defaultSettings, this.settings);
     this.texts = Object.assign(this.defaultTexts, this.texts);
     this.title = this.texts.defaultTitle || '';
-    this.parents = [];
-    this.options.forEach(option => {
-      if(typeof(option.parentId)!=='undefined'&&this.parents.indexOf(option.parentId)<0) {
-        this.parents.push(option.parentId);
-      }
-    });
+    this.updateParents();
   }
 
   onModelChange: Function = (_: any) => {};
@@ -244,10 +238,14 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
   }
 
   ngDoCheck() {
-    const changes = this.differ.diff(this.model);
-    if (changes) {
+    const modelChanges = this.differ.diff(this.model);
+    if (modelChanges) {
       this.updateNumSelected();
       this.updateTitle();
+    }
+    const optionChanges = this.differ.diff(this.options);
+    if (optionChanges) {
+      this.updateParents();
     }
   }
 
@@ -354,6 +352,15 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
         + ' '
         + (this.numSelected === 1 ? this.texts.checked : this.texts.checkedPlural);
     }
+  }
+
+  updateParents() {
+    this.parents = [];
+    this.options.forEach(option => {
+      if(typeof(option.parentId)!=='undefined'&&this.parents.indexOf(option.parentId)<0) {
+        this.parents.push(option.parentId);
+      }
+    });
   }
 
   checkAll() {

@@ -76,7 +76,7 @@ export class AppComponent implements OnInit {
 	};
 
   ngOnInit() {
-    this.filterCountries(true, false);
+    this.filterCountries(false, false);
     this.settings = Object.keys(this.selectSettings).map(setting => ({
       name: setting,
       inputType: (typeof(this.selectSettings[setting])=='boolean' ? 'checkbox' :
@@ -98,6 +98,5 @@ export class AppComponent implements OnInit {
 
   applySettings() {
     this.selectSettings = Object.assign({}, this.selectSettings);
-    this.filteredCountries = this.filteredCountries.slice();
   }
 }
