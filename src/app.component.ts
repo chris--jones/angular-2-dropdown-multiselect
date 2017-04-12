@@ -65,14 +65,17 @@ export class AppComponent implements OnInit {
     pullRight: false,
     enableSearch: false,
     checkedStyle: 'checkboxes',
-    buttonClasses: 'btn btn-default btn-secondary',
+    buttonClasses: 'btn btn-default',
+    itemClasses: '',
     selectionLimit: 0,
     closeOnSelect: false,
     autoUnselect: false,
     showCheckAll: false,
     showUncheckAll: false,
     dynamicTitleMaxItems: 3,
-    maxHeight: '300px'
+    maxHeight: '300px',
+    fixedTitle: false,
+    displayAllSelectedText: false
 	};
 
   ngOnInit() {
