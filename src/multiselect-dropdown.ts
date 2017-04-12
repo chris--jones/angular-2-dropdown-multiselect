@@ -217,12 +217,7 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
     this.settings = Object.assign(this.defaultSettings, this.settings);
     this.texts = Object.assign(this.defaultTexts, this.texts);
     this.title = this.texts.defaultTitle || '';
-    this.parents = [];
-    this.options.forEach(option => {
-      if(typeof(option.parentId)!=='undefined'&&this.parents.indexOf(option.parentId)<0) {
-        this.parents.push(option.parentId);
-      }
-    });
+    this.updateParents();
   }
 
   onModelChange: Function = (_: any) => {};
@@ -249,10 +244,14 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
   }
 
   ngDoCheck() {
-    const changes = this.differ.diff(this.model);
-    if (changes) {
+    const modelChanges = this.differ.diff(this.model);
+    if (modelChanges) {
       this.updateNumSelected();
       this.updateTitle();
+    }
+    const optionChanges = this.differ.diff(this.options);
+    if (optionChanges) {
+      this.updateParents();
     }
   }
 
@@ -359,6 +358,16 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
     }
   }
   
+  updateParents() {
+    this.parents = [];
+    this.options.forEach(option => {
+      if(typeof(option.parentId)!=='undefined'&&this.parents.indexOf(option.parentId)<0) {
+        this.parents.push(option.parentId);
+      }
+    });
+  }
+
+    
   searchFilterApplied() {
     return this.settings.enableSearch && this.searchFilterText && this.searchFilterText.length > 0;
   }
