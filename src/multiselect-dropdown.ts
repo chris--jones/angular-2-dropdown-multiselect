@@ -217,12 +217,7 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
     this.settings = Object.assign(this.defaultSettings, this.settings);
     this.texts = Object.assign(this.defaultTexts, this.texts);
     this.title = this.texts.defaultTitle || '';
-    this.parents = [];
-    this.options.forEach(option => {
-      if(typeof(option.parentId)!=='undefined'&&this.parents.indexOf(option.parentId)<0) {
-        this.parents.push(option.parentId);
-      }
-    });
+    this.updateParents();
   }
 
   onModelChange: Function = (_: any) => {};
@@ -250,9 +245,13 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
 
   ngDoCheck() {
     const changes = this.differ.diff(this.model);
+    const optionChanges = this.differ.diff(this.options);
     if (changes) {
       this.updateNumSelected();
       this.updateTitle();
+    }
+    if (optionChanges) {
+      this.updateParents();
     }
   }
 
@@ -295,7 +294,7 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
         this.model.splice(parentIndex, 1);
         this.onRemoved.emit(option.parentId);
       } else if (this.parents.indexOf(option.id) > -1) {
-        let childIds = this.options.filter(child => this.model.indexOf(child.id)>-1 && child.parentId == option.id).map(child => child.id);
+        let childIds = (!this.searchFilterApplied() ? this.options : (new MultiSelectSearchFilter()).transform(this.options, this.searchFilterText)).filter(child => this.model.indexOf(child.id) >-1 && child.parentId == option.id).map(child => child.id);
         this.model = this.model.filter(id => childIds.indexOf(id)<0);
         childIds.forEach(childId => this.onRemoved.emit(childId));
       }
@@ -311,7 +310,7 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
               this.onAdded.emit(option.parentId);
           }
         } else if (this.parents.indexOf(option.id)>-1) {
-          let children = this.options.filter(child => this.model.indexOf(child.id)<0 && child.parentId == option.id);
+          let children = (!this.searchFilterApplied() ? this.options : (new MultiSelectSearchFilter()).transform(this.options, this.searchFilterText)).filter(child => this.model.indexOf(child.id)<0 && child.parentId == option.id);
           children.forEach(child => {
               this.model.push(child.id);
               this.onAdded.emit(child.id);
@@ -348,7 +347,7 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
     } else if (this.settings.dynamicTitleMaxItems && this.settings.dynamicTitleMaxItems >= this.numSelected) {
       this.title = this.options
         .filter((option: IMultiSelectOption) =>
-          this.model && this.model.indexOf(option.id) > -1
+          this.model && this.model.indexOf(option.id) > -1 && this.parents.indexOf(option.id) < 0
         )
         .map((option: IMultiSelectOption) => option.name)
         .join(', ');
@@ -358,22 +357,43 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
         + (this.numSelected === 1 ? this.texts.checked : this.texts.checkedPlural);
     }
   }
-  
+
+  updateParents() {
+    this.parents = [];
+    this.options.forEach(option => {
+      if(typeof(option.parentId)!=='undefined'&&this.parents.indexOf(option.parentId)<0) {
+        this.parents.push(option.parentId);
+      }
+    });
+  }
+
   searchFilterApplied() {
     return this.settings.enableSearch && this.searchFilterText && this.searchFilterText.length > 0;
   }
 
   checkAll() {
-    let checkedOptions = (!this.searchFilterApplied() ? this.options :
+    let searchFilterApplied: boolean = this.searchFilterApplied(),
+    parentIds: any[] = [],
+    checkedOptions: Array<any> = (!searchFilterApplied ? this.options :
       (new MultiSelectSearchFilter()).transform(this.options, this.searchFilterText))
       .filter((option: IMultiSelectOption) => {
-        if (this.model.indexOf(option.id) === -1) {
+        if (this.model.indexOf(option.id) === -1 && (!searchFilterApplied || this.parents.indexOf(option.id) < 0)) {
+          if (option.parentId && parentIds.indexOf(option.parentId) < 0) {
+            parentIds.push(option.parentId);
+          }
           this.onAdded.emit(option.id);
           return true;
         }
         return false;
       }).map((option: IMultiSelectOption) => option.id);
     this.model = this.model.concat(checkedOptions);
+    parentIds.forEach(parentId => {
+      if (this.options.filter(option => option.parentId === parentId)
+        .every(option => this.model.indexOf(option.id) > -1)) {
+          this.model.push(parentId);
+          this.onAdded.emit(parentId);
+        }
+    });
     this.onModelChange(this.model);
     this.onModelTouched();
   }
