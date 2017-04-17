@@ -41,6 +41,8 @@ export interface IMultiSelectSettings {
   pullRight?: boolean;
   enableSearch?: boolean;
   checkedStyle?: 'checkboxes' | 'glyphicon' | 'fontawesome';
+  idProperty?: string;
+  nameProperty?: string;
   buttonClasses?: string;
   itemClasses?: string;
   selectionLimit?: number;
@@ -69,7 +71,7 @@ export interface IMultiSelectTexts {
 })
 export class MultiSelectSearchFilter implements PipeTransform {
   transform(options: Array<IMultiSelectOption>, args: string): Array<IMultiSelectOption> {
-    const matchPredicate = (option: IMultiSelectOption) => option.name.toLowerCase().indexOf((args || '').toLowerCase()) > -1,
+    const matchPredicate = (option: IMultiSelectOption) => (option.name||'').toLowerCase().indexOf((args || '').toLowerCase()) > -1,
       getChildren = (option: IMultiSelectOption) => options.filter(child => child.parentId === option.id),
       getParent = (option: IMultiSelectOption) => options.find(parent => option.parentId === parent.id);
     return options.filter((option: IMultiSelectOption) => {
@@ -145,7 +147,7 @@ export class MultiSelectSearchFilter implements PipeTransform {
   `
 })
 export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccessor, Validator {
-  @Input() options: Array<IMultiSelectOption>;
+  @Input() options: Array<IMultiSelectOption | any>;
   @Input() settings: IMultiSelectSettings;
   @Input() texts: IMultiSelectTexts;
   @Input() disabled: boolean = false;
@@ -217,12 +219,13 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
     this.settings = Object.assign(this.defaultSettings, this.settings);
     this.texts = Object.assign(this.defaultTexts, this.texts);
     this.title = this.texts.defaultTitle || '';
-    this.parents = [];
-    this.options.forEach(option => {
-      if(typeof(option.parentId)!=='undefined'&&this.parents.indexOf(option.parentId)<0) {
-        this.parents.push(option.parentId);
-      }
-    });
+    if (this.settings.idProperty) {
+      this.options = this.options.map(option => (<IMultiSelectOption>{
+        id: option[this.settings.idProperty],
+        name: option[this.settings.nameProperty || 'name']
+      }));
+    }
+    this.updateParents();
   }
 
   onModelChange: Function = (_: any) => {};
@@ -250,9 +253,13 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
 
   ngDoCheck() {
     const changes = this.differ.diff(this.model);
+    const optionChanges = this.differ.diff(this.options);
     if (changes) {
       this.updateNumSelected();
       this.updateTitle();
+    }
+    if (optionChanges) {
+      this.updateParents();
     }
   }
 
@@ -295,7 +302,7 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
         this.model.splice(parentIndex, 1);
         this.onRemoved.emit(option.parentId);
       } else if (this.parents.indexOf(option.id) > -1) {
-        let childIds = this.options.filter(child => this.model.indexOf(child.id)>-1 && child.parentId == option.id).map(child => child.id);
+        let childIds = this.options.filter(child => this.model.indexOf(child.id) >-1 && child.parentId == option.id).map(child => child.id);
         this.model = this.model.filter(id => childIds.indexOf(id)<0);
         childIds.forEach(childId => this.onRemoved.emit(childId));
       }
@@ -358,7 +365,16 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
         + (this.numSelected === 1 ? this.texts.checked : this.texts.checkedPlural);
     }
   }
-  
+
+  updateParents() {
+    this.parents = [];
+    this.options.forEach(option => {
+      if(typeof(option.parentId)!=='undefined'&&this.parents.indexOf(option.parentId)<0) {
+        this.parents.push(option.parentId);
+      }
+    });
+  }
+
   searchFilterApplied() {
     return this.settings.enableSearch && this.searchFilterText && this.searchFilterText.length > 0;
   }

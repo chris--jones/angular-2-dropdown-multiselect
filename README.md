@@ -33,7 +33,7 @@ import { MultiselectDropdownModule } from 'angular-2-dropdown-multiselect';
 })
 ```
 
-Define options in your consuming component:
+Define options in your consuming component as either an array of IMultiSelectOption:
 
 ```js
 import { IMultiSelectOption } from 'angular-2-dropdown-multiselect';
@@ -45,6 +45,29 @@ export class MyClass implements OnInit {
             { id: 1, name: 'Option 1' },
             { id: 2, name: 'Option 2' },
         ];
+    }
+    onChange() {
+        console.log(this.optionsModel);
+    }
+}
+```
+
+or as a custom type, with id and name properties in your settings
+
+```js
+import { IMultiSelectOption } from 'angular-2-dropdown-multiselect';
+
+export class MyClass implements OnInit {
+    optionsModel: number[];
+    ngOnInit() {
+        myOptions: IMyCustomOptions[] = [
+            { code: 'one', description: 'Option 1' },
+            { code: 'two', description: 'Option 2' },
+        ];
+        mySettings: IMultiSelectSettings = {
+          idProperty: 'code',
+          nameProperty: 'description'
+        }
     }
     onChange() {
         console.log(this.optionsModel);
@@ -110,6 +133,8 @@ myOptions: IMultiSelectOption[] = [
 | enableSearch         | Enable searching the dropdown items                                | false             |
 | checkedStyle         | Style of checked items one of 'checkboxes', 'glyphicon' or 'fontawesome'  | 'checkboxes'      |
 | buttonClasses        | CSS classes to apply to the trigger button                         | 'btn btn-default' |
+| idProperty           | Item property to use if assigning custom items to options          | ''                |
+| nameProperty         | Name property to use if assigning custom items to options          | '' (will fallback to 'name')               |
 | itemClasses          | CSS classes to apply to items                                      | ''                |
 | selectionLimit       | Maximum number of items that may be selected (0 = no limit)        | 0                 |
 | autoUnselect         | Unselect the previous selection(s) once selectionLimit is reached  | false             |
