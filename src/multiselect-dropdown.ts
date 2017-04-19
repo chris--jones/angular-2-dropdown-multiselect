@@ -204,8 +204,7 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
     allSelected: 'All selected',
   };
 
-  constructor(private element: ElementRef,
-              differs: IterableDiffers) {
+  constructor(private element: ElementRef, differs: IterableDiffers) {
     this.differ = differs.find([]).create(null);
   }
 
@@ -219,7 +218,13 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
     this.settings = Object.assign(this.defaultSettings, this.settings);
     this.texts = Object.assign(this.defaultTexts, this.texts);
     this.title = this.texts.defaultTitle || '';
-    if (this.settings.idProperty) {
+    if (this.options && this.options.length > 0 && ['boolean', 'number', 'string'].indexOf(typeof(this.options[0]))>-1)
+    {
+      this.options = this.options.map(option => (<IMultiSelectOption>{
+        id: option,
+        name: option.toString()
+      }));
+    } else if (this.settings.idProperty) {
       this.options = this.options.map(option => (<IMultiSelectOption>{
         id: option[this.settings.idProperty],
         name: option[this.settings.nameProperty || 'name']
