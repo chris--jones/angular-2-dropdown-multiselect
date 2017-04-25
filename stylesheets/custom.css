@@ -51,11 +51,11 @@
   left:-28px;
 }
 .dropdown input[type=checkbox]:before {
-  background-image:url('/images/ic_check_box_outline_blank_black_24px.svg');
+  background-image:url('images/ic_check_box_outline_blank_black_24px.svg');
 }
 .dropdown input[type=checkbox]:checked:after {
   animation:scaleFade 0.2s ease-in-out;
-  background-image:url('/images/ic_check_box_black_24px.svg');
+  background-image:url('images/ic_check_box_black_24px.svg');
 }
 @keyframes scaleFade {
   0% { transform:scale(0.6); opacity:0 }
