@@ -66,6 +66,7 @@ export class AppComponent implements OnInit {
     enableSearch: false,
     checkedStyle: 'checkboxes',
     buttonClasses: 'btn btn-default',
+    wrapperClasses: 'dropdown-inline',
     itemClasses: '',
     selectionLimit: 0,
     closeOnSelect: false,
