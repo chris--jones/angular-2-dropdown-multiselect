@@ -14,10 +14,10 @@ import {IMultiSelectOption, IMultiSelectSettings, IMultiSelectTexts} from './mul
         <h2>Config</h2>
         <ul class="config">
           <li *ngFor="let setting of settings, let i = index">
-            <label [for]="'chkSetting_'+i">{{setting.name}}</label>
             <input *ngIf="setting.inputType==='checkbox' && setting.name !== 'checkedStyle'" [id]="'chkSetting_'+i" type="checkbox" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()" />
+            <label [for]="'chkSetting_'+i">{{setting.name}}</label>
             <input *ngIf="setting.inputType!=='checkbox' && setting.name !== 'checkedStyle'" [id]="'chkSetting_'+i" [type]="setting.inputType" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()" />
-            <select *ngIf="setting.name === 'checkedStyle'" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()">
+            <select style="display:inline" *ngIf="setting.name === 'checkedStyle'" [(ngModel)]="selectSettings[setting.name]" (change)="applySettings()">
               <option value="checkboxes">checkboxes</option>
               <option value="glyphicon">glyphicon</option>
               <option value="fontawesome">fontawesome</option>
@@ -27,10 +27,10 @@ import {IMultiSelectOption, IMultiSelectSettings, IMultiSelectTexts} from './mul
       </div>
       <div class="col-md-6">
         <h2>Data</h2>
-        <label for="chkParents">Parents</label>
         <input id="chkParents" #chkParents type="checkbox" [checked]="dataParents" (change)="filterCountries($event.target.checked, chkLabels.checked)" />
-        <label for="chkLabels">Labels</label>
+        <label for="chkParents">Parents</label>
         <input id="chkLabels" #chkLabels type="checkbox" [checked]="dataLabels" (change)="filterCountries(chkParents.checked, $event.target.checked)" />
+        <label for="chkLabels">Labels</label>
         <pre class="data">{{ filteredCountries | json }}</pre>
       </div>
 	`,

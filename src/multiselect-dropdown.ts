@@ -87,9 +87,19 @@ export class MultiSelectSearchFilter implements PipeTransform {
   styles: [`
     a {
       outline: none !important;
+      text-decoration: none;
+    }
+    label {
+      font-weight: normal;
     }
     .dropdown-inline {
       display: inline-block;
+    }
+    .parent-item label {
+      font-weight:bold;
+    }
+    .child-item a {
+      padding-left:30px;
     }
   `],
   template: `
@@ -126,12 +136,12 @@ export class MultiSelectSearchFilter implements PipeTransform {
           </a>
         </li>
         <li *ngIf="settings.showCheckAll || settings.showUncheckAll" class="dropdown-divider divider"></li>
-        <li class="dropdown-item" [ngStyle]="getItemStyle(option)" *ngFor="let option of options | searchFilter:searchFilterText"
+        <li class="dropdown-item" [class.parent-item]="this.parents.indexOf(option.id)>=0" [class.child-item]="this.parents.length>0&&this.parents.indexOf(option.id)<0" [ngStyle]="getItemStyle(option)" *ngFor="let option of options | searchFilter:searchFilterText"
             (click)="!option.isLabel && setSelected($event, option)" [class.dropdown-header]="option.isLabel">
           <ng-template [ngIf]="option.isLabel">
             {{ option.name }}
           </ng-template>
-          <a *ngIf="!option.isLabel" href="javascript:;" role="menuitem" tabindex="-1" [style.padding-left]="this.parents.length>0&&this.parents.indexOf(option.id)<0&&'30px'">
+          <a *ngIf="!option.isLabel" href="javascript:;" role="menuitem" tabindex="-1">
             <input *ngIf="settings.checkedStyle === 'checkboxes'" type="checkbox"
               [checked]="isSelected(option)" (click)="preventCheckboxCheck($event, option)"/>
             <span *ngIf="settings.checkedStyle === 'glyphicon'" style="width: 16px;"
@@ -139,9 +149,9 @@ export class MultiSelectSearchFilter implements PipeTransform {
             <span *ngIf="settings.checkedStyle === 'fontawesome'" style="width: 16px;display: inline-block;">
   			      <i *ngIf="isSelected(option)" class="fa fa-check" aria-hidden="true"></i>
   			    </span>
-            <span [ngClass]="settings.itemClasses" [style.font-weight]="this.parents.indexOf(option.id)>=0?'bold':'normal'">
+            <label [ngClass]="settings.itemClasses">
               {{ option.name }}
-            </span>
+            </label>
           </a>
         </li>
       </ul>
@@ -222,12 +232,7 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
     this.settings = Object.assign(this.defaultSettings, this.settings);
     this.texts = Object.assign(this.defaultTexts, this.texts);
     this.title = this.texts.defaultTitle || '';
-    this.parents = [];
-    this.options.forEach(option => {
-      if(typeof(option.parentId)!=='undefined'&&this.parents.indexOf(option.parentId)<0) {
-        this.parents.push(option.parentId);
-      }
-    });
+    this.updateParents();
   }
 
   onModelChange: Function = (_: any) => {};
@@ -255,10 +260,23 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
 
   ngDoCheck() {
     const changes = this.differ.diff(this.model);
+    const optionChanges = this.differ.diff(this.options);
     if (changes) {
       this.updateNumSelected();
       this.updateTitle();
     }
+    if (optionChanges) {
+      this.updateParents();
+    }
+  }
+
+  updateParents() {
+    this.parents = [];
+    this.options.forEach(option => {
+      if(typeof(option.parentId)!=='undefined'&&this.parents.indexOf(option.parentId)<0) {
+        this.parents.push(option.parentId);
+      }
+    });
   }
 
   validate(_c: AbstractControl): { [key: string]: any; } {

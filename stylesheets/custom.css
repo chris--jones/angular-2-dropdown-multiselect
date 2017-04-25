@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css?family=Didact+Gothic');
+
+.dropdown {
+  font-family: 'Didact Gothic', sans-serif;
+  font-size: 18px;
+  min-width: 250px;
+}
+
+.dropdown>button {
+  background: none;
+  border: none;
+  border-bottom: 2px solid #2196F3;
+  min-width: 100%;
+}
+
+.dropdown ul li {
+  list-style: none;
+  position: relative;
+}
+
+.dropdown .parent-item label {
+  font-size: 24px;
+}
+
+.dropdown .parent-item input[type=checkbox] {
+  top: 8px;
+}
+
+.dropdown .parent-item label {
+  color: #673ab7;
+}
+
+.dropdown-menu {
+  overflow-y: scroll !important;
+}
+
+.dropdown-menu > li.dropdown-item > a {
+  padding-left:5px;
+}
+.dropdown input[type=checkbox] {
+  position:absolute;
+  width:0;
+  height:0;
+}
+.dropdown input[type=checkbox]:before, .dropdown input[type=checkbox]:checked:after {
+  content:'';
+  display:block;
+  position:absolute;
+  height:24px;
+  width:24px;
+  left:-28px;
+}
+.dropdown input[type=checkbox]:before {
+  background-image:url('/images/ic_check_box_outline_blank_black_24px.svg');
+}
+.dropdown input[type=checkbox]:checked:after {
+  animation:scaleFade 0.2s ease-in-out;
+  background-image:url('/images/ic_check_box_black_24px.svg');
+}
+@keyframes scaleFade {
+  0% { transform:scale(0.6); opacity:0 }
+  80% { transform:scale(1.4); opacity:0.8 }
+  100% { transform:scale(1); opacity:1 }
+}
