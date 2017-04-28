@@ -170,8 +170,8 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
     }
   }
 
-  model: number[];
-  parents: number[];
+  model: any[];
+  parents: any[];
   title: string;
   differ: any;
   numSelected: number = 0;
@@ -358,7 +358,7 @@ export class MultiselectDropdown implements OnInit, DoCheck, ControlValueAccesso
         + (this.numSelected === 1 ? this.texts.checked : this.texts.checkedPlural);
     }
   }
-  
+
   searchFilterApplied() {
     return this.settings.enableSearch && this.searchFilterText && this.searchFilterText.length > 0;
   }
