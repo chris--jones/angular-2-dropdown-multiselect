@@ -1,10 +1,14 @@
 node_modules
 src/*.js
 src/*.js.map
+src/dropdown/*.js
+src/dropdown/*.js.map
 /compiled
 *.metadata.json
 *.map.js
 index.js
 index.js.map
-.vscode/*
 dist/*
+.vscode/*
+.idea
+yarn-error.log
